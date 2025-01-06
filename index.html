@@ -14270,15 +14270,16 @@
                         percentileElement.textContent = "Not Found";
                     }
                 }
-                if (percentileElement.textContent.includes('*')) {
-                    percentileElement.style.color = "red";
-                } else if (percentileElement.textContent.includes("Not")) {
-                    percentileElement.style.color = "lightgray";
-                } else {
-                    percentileElement.style.color = "blue";
-                }
             } else {
-                percentileElement.textContent = "Not Available";
+                percentileElement.textContent = "No Data";
+            }
+
+            if (percentileElement.textContent.includes('*')) {
+                    percentileElement.style.color = "red";
+            } else if (percentileElement.textContent.includes("Not")) {
+                percentileElement.style.color = "lightgray";
+            } else {
+                percentileElement.style.color = "blue";
             }
         });
     }
