@@ -154,8 +154,21 @@
 
     <!-- Test Section -->
     <div class="test-section">
-        <div class="test-header">
+        <!-- <div class="test-header">
             <h2>Enter Raw Scores</h2>
+            <button onclick="calculatePercentiles()">Calculate Percentiles</button>
+        </div> -->
+        <div class="test-header">
+            <div style="display: flex; align-items: center;">
+                <h2>Enter Raw Scores</h2>
+                <input
+                    type="text"
+                    id="searchBox"
+                    placeholder="Search tests..."
+                    oninput="filterTests()"
+                    style="padding: 5px; font-size: 16px; width: 200px; margin-left: 20px;"
+                />
+            </div>
             <button onclick="calculatePercentiles()">Calculate Percentiles</button>
         </div>
         <div id="tests"></div>
@@ -14173,98 +14186,112 @@
 
     // Function to calculate percentiles
     function calculatePercentiles() {
-    const gender = document.getElementById("gender").value;
-    const ageRange = document.getElementById("ageRange").value;
-    const education = document.getElementById("education").value;
+        const gender = document.getElementById("gender").value;
+        const ageRange = document.getElementById("ageRange").value;
+        const education = document.getElementById("education").value;
 
-    testNames.forEach(test => {
-        const rawScoreInput = parseInt(document.getElementById(`rawScore-${test}`).value);
-        const percentileElement = document.getElementById(`percentile-${test}`);
+        testNames.forEach(test => {
+            const rawScoreInput = parseInt(document.getElementById(`rawScore-${test}`).value);
+            const percentileElement = document.getElementById(`percentile-${test}`);
 
-        // Retrieve the relevant dataset
-        if (jsonData[test] && jsonData[test][gender] && jsonData[test][gender][ageRange] && jsonData[test][gender][ageRange][education]) {
-            const scoreData = jsonData[test][gender][ageRange][education];
-            const scores = Object.keys(scoreData).map(Number).sort((a, b) => a - b);
+            // Retrieve the relevant dataset
+            if (jsonData[test] && jsonData[test][gender] && jsonData[test][gender][ageRange] && jsonData[test][gender][ageRange][education]) {
+                const scoreData = jsonData[test][gender][ageRange][education];
+                const scores = Object.keys(scoreData).map(Number).sort((a, b) => a - b);
 
-            if (scores.includes(rawScoreInput)) {
-                // Exact Match
-                const percentile = scoreData[rawScoreInput];
-                percentileElement.textContent = `${percentile}${percentile <= 15 ? '*' : ''}`;
-            } else {
-                // Non-exact Match
-                const lower = scores.filter(score => score < rawScoreInput).pop();
-                const upper = scores.find(score => score > rawScoreInput);
+                if (scores.includes(rawScoreInput)) {
+                    // Exact Match
+                    const percentile = scoreData[rawScoreInput];
+                    percentileElement.textContent = `${percentile}${percentile <= 15 ? '*' : ''}`;
+                } else {
+                    // Non-exact Match
+                    const lower = scores.filter(score => score < rawScoreInput).pop();
+                    const upper = scores.find(score => score > rawScoreInput);
 
-                if (lower !== undefined && upper !== undefined) {
-                    let lowerPercentile = scoreData[lower];
-                    let upperPercentile = scoreData[upper];
-
-                    if (lowerPercentile !== undefined && typeof lowerPercentile === "string") {
-                        lowerPercentile = lowerPercentile.split(" - ")[1];
-                    }
-                    if (upperPercentile !== undefined && typeof upperPercentile === "string") {
-                        upperPercentile = upperPercentile.split(" - ")[0];
-                    }
-
-                    if (lowerPercentile > upperPercentile) {
-                        let temp = lowerPercentile;
-                        lowerPercentile = upperPercentile;
-                        upperPercentile = temp;
-                    }
-
-                    percentileElement.textContent = `${lowerPercentile}${lowerPercentile <= 15 ? '*' : ''} - ${upperPercentile}${upperPercentile <= 15 ? '*' : ''}`;
-                } else if (lower !== undefined) {
-                    if (testsWithReverseScoring.includes(test)) {
+                    if (lower !== undefined && upper !== undefined) {
                         let lowerPercentile = scoreData[lower];
+                        let upperPercentile = scoreData[upper];
 
                         if (lowerPercentile !== undefined && typeof lowerPercentile === "string") {
                             lowerPercentile = lowerPercentile.split(" - ")[1];
                         }
-
-                        percentileElement.textContent = `< ${lowerPercentile}${lowerPercentile <= 15 ? '*' : ''} (Below Lowest Range)`;
-                    } else {
-                        let lowerPercentile = scoreData[lower];
-
-                        if (lowerPercentile !== undefined && typeof lowerPercentile === "string") {
-                            lowerPercentile = lowerPercentile.split(" - ")[1];
-                        }
-
-                        percentileElement.textContent = `> ${lowerPercentile}${lowerPercentile <= 15 ? '*' : ''} (Above Highest Range)`;
-                    }
-                } else if (upper !== undefined) {
-                    if (testsWithReverseScoring.includes(test)) {
-                        let upperPercentile = scoreData[upper];
-
-                        if (upperPercentile !== undefined && typeof upperPercentile === "string") {
-                            upperPercentile = upperPercentile.split(" - ")[1];
-                        }
-
-                        percentileElement.textContent = `> ${upperPercentile}${upperPercentile <= 15 ? '*' : ''} (Above Highest Range)`;
-                    } else {
-                        let upperPercentile = scoreData[upper];
-
                         if (upperPercentile !== undefined && typeof upperPercentile === "string") {
                             upperPercentile = upperPercentile.split(" - ")[0];
                         }
 
-                        percentileElement.textContent = `< ${upperPercentile}${upperPercentile <= 15 ? '*' : ''} (Below Lowest Range)`;
+                        if (lowerPercentile > upperPercentile) {
+                            let temp = lowerPercentile;
+                            lowerPercentile = upperPercentile;
+                            upperPercentile = temp;
+                        }
+
+                        percentileElement.textContent = `${lowerPercentile}${lowerPercentile <= 15 ? '*' : ''} - ${upperPercentile}${upperPercentile <= 15 ? '*' : ''}`;
+                    } else if (lower !== undefined) {
+                        if (testsWithReverseScoring.includes(test)) {
+                            let lowerPercentile = scoreData[lower];
+
+                            if (lowerPercentile !== undefined && typeof lowerPercentile === "string") {
+                                lowerPercentile = lowerPercentile.split(" - ")[1];
+                            }
+
+                            percentileElement.textContent = `< ${lowerPercentile}${lowerPercentile <= 15 ? '*' : ''} (Below Lowest Range)`;
+                        } else {
+                            let lowerPercentile = scoreData[lower];
+
+                            if (lowerPercentile !== undefined && typeof lowerPercentile === "string") {
+                                lowerPercentile = lowerPercentile.split(" - ")[1];
+                            }
+
+                            percentileElement.textContent = `> ${lowerPercentile}${lowerPercentile <= 15 ? '*' : ''} (Above Highest Range)`;
+                        }
+                    } else if (upper !== undefined) {
+                        if (testsWithReverseScoring.includes(test)) {
+                            let upperPercentile = scoreData[upper];
+
+                            if (upperPercentile !== undefined && typeof upperPercentile === "string") {
+                                upperPercentile = upperPercentile.split(" - ")[1];
+                            }
+
+                            percentileElement.textContent = `> ${upperPercentile}${upperPercentile <= 15 ? '*' : ''} (Above Highest Range)`;
+                        } else {
+                            let upperPercentile = scoreData[upper];
+
+                            if (upperPercentile !== undefined && typeof upperPercentile === "string") {
+                                upperPercentile = upperPercentile.split(" - ")[0];
+                            }
+
+                            percentileElement.textContent = `< ${upperPercentile}${upperPercentile <= 15 ? '*' : ''} (Below Lowest Range)`;
+                        }
+                    } else {
+                        percentileElement.textContent = "Not Found";
                     }
-                } else {
-                    percentileElement.textContent = "Not Found";
                 }
-            }
-            if (percentileElement.textContent.includes('*')) {
-                percentileElement.style.color = "red";
-            } else if (percentileElement.textContent.includes("Not")) {
-                percentileElement.style.color = "lightgray";
+                if (percentileElement.textContent.includes('*')) {
+                    percentileElement.style.color = "red";
+                } else if (percentileElement.textContent.includes("Not")) {
+                    percentileElement.style.color = "lightgray";
+                } else {
+                    percentileElement.style.color = "blue";
+                }
             } else {
-                percentileElement.style.color = "blue";
+                percentileElement.textContent = "Not Available";
             }
-        } else {
-            percentileElement.textContent = "Not Available";
-        }
-    });
-}
+        });
+    }
+
+    function filterTests() {
+        const keyword = document.getElementById("searchBox").value.toLowerCase();
+        const testRows = document.querySelectorAll(".test-row");
+
+        testRows.forEach(row => {
+            const testName = row.querySelector(".test-name-span").textContent.toLowerCase();
+            if (testName.includes(keyword)) {
+                row.style.display = "flex"; // Show matching tests
+            } else {
+                row.style.display = "none"; // Hide non-matching tests
+            }
+        });
+    }
     </script>
 
 </body>
